@@ -1,0 +1,8 @@
+# custom
+lib/
+bin/
+archive/
+__pycache__/
+.DS_Store
+
+
