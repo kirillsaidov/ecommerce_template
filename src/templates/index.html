@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Welcome to StudyVerse {% endblock %}</h1>
+    {% for stud in studs %}
+        <a href="{{ url_for('stud', stud_id=loop.index0) }}">
+            <h2>{{ stud['name'] }}</h2>
+        </a>
+        <span class="badge badge-primary">{{ stud['spec'] }}</span>
+        <hr>
+    {% endfor %}
+{% endblock %}
