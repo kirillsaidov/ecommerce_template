@@ -15,7 +15,10 @@ def index():
 
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    text = None
+    with open('src/static/info/about.txt', 'r') as file:
+        text = file.read().split('\n')
+    return render_template('about.html', text=text)
 
 
 # @app.route('/<int:stud_id>')
