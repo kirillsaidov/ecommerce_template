@@ -26,37 +26,42 @@ def about():
         'about': preload_data['about'],
     })
 
+
 @app.route('/brands')
 def brands():
-    return render_template('about.html', data={
+    return render_template('brands.html', data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
     })
+
 
 @app.route('/payment')
 def payment():
-    return render_template('about.html', data={
+    return render_template('payment.html', data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
     })
+
 
 @app.route('/delivery')
 def delivery():
-    return render_template('about.html', data={
+    return render_template('delivery.html', data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
     })
+
 
 @app.route('/collaboration')
 def collaboration():
-    return render_template('about.html', data={
+    return render_template('collaboration.html', data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
     })
 
+
 @app.route('/contacts')
 def contacts():
-    return render_template('about.html', data={
+    return render_template('contacts.html', data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
     })

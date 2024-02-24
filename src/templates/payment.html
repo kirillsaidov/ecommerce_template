@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- IMAGE -->
+    <div class="company_about_block">
+        <div class="company_about_bg_image">
+            <img src="static/imgs/bg_tech.jpg" alt="image" style="width:100%;">
+        </div>
+        <div class="company_about_overlay_title">
+            <img src="static/imgs/logo.png"/>
+            <h1 class="company_name">NOYtech</h1>
+        </div>
+    </div>
+
+    <!-- ABOUT TEXT -->
+    <div class="jumbotron jumbotron-fluid company_about_text">
+        <div class="container">
+            <h1 class="display-4 company_name">
+                Способы оплаты
+            </h1>
+            <p class="company_about_info">
+                {% for line in data['about'] %}
+                    <p>{{line}}</p>
+                {% endfor %}
+            </p>
+        </div>
+    </div>    
+{% endblock %}
+
