@@ -1,0 +1,51 @@
+@font-face {
+    font-family: "GetVoIP";
+    font-weight: 800;
+    src: url("../fonts/getvoip-grotesque.regular.ttf");
+}
+
+.company_name {
+    font-family: "GetVoIP";
+    padding: 20px 0px 0px 0px;
+}
+
+.footer_block 
+{
+    position: absolute;
+    left: 0%;
+    background-color: lightgray;
+}
+
+.company_about_bg_image img {
+    height: 270px;
+    object-fit: cover;
+}
+
+/* overlay logo */
+.company_about_overlay_title img {
+    filter: invert(1);
+    height: 64px;
+    padding: 0px 0px 10px 0px;
+}
+
+.company_about_block {
+    position: relative;
+    display: inline-block;
+}
+
+.company_about_overlay_title {
+    position: absolute;
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    color: #fff; 
+    padding: 10px 20px; 
+    font-size: 20px; 
+    text-align: center;
+}
+
+.company_about_text {
+    padding: 3% 3% 3% 3%;
+    background-color: rgba(230, 230, 230, 255);
+}
+

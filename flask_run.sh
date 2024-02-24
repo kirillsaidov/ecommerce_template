@@ -1,5 +1,6 @@
 #!/bin/sh
 
 # flask run
-python3 src/app.py
+cd src/
+python3 app.py
 

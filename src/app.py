@@ -6,19 +6,60 @@ import aux
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '0123456789'
+preload_data = {
+    'about': open('static/info/about.txt', 'r').read().split('\n'),
+    'footer': open('static/info/footer.txt', 'r').read(),
+}
 
 
 @app.route('/')
 def index():
-    return render_template('index.html', studs=data.studs)
+    return render_template('index.html', data={
+        'footer': preload_data['footer'],
+    })
 
 
 @app.route('/about')
 def about():
-    text = None
-    with open('src/static/info/about.txt', 'r') as file:
-        text = file.read().split('\n')
-    return render_template('about.html', text=text)
+    return render_template('about.html', data={
+        'footer': preload_data['footer'],
+        'about': preload_data['about'],
+    })
+
+@app.route('/brands')
+def brands():
+    return render_template('about.html', data={
+        'footer': preload_data['footer'],
+        'about': preload_data['about'],
+    })
+
+@app.route('/payment')
+def payment():
+    return render_template('about.html', data={
+        'footer': preload_data['footer'],
+        'about': preload_data['about'],
+    })
+
+@app.route('/delivery')
+def delivery():
+    return render_template('about.html', data={
+        'footer': preload_data['footer'],
+        'about': preload_data['about'],
+    })
+
+@app.route('/collaboration')
+def collaboration():
+    return render_template('about.html', data={
+        'footer': preload_data['footer'],
+        'about': preload_data['about'],
+    })
+
+@app.route('/contacts')
+def contacts():
+    return render_template('about.html', data={
+        'footer': preload_data['footer'],
+        'about': preload_data['about'],
+    })
 
 
 # @app.route('/<int:stud_id>')
