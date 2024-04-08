@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+    <!-- IMAGE -->
+    <div class="company_about_block">
+        <div class="company_about_bg_image">
+            <img src="static/imgs/bg_tech.jpg" alt="image" style="width:100%;">
+        </div>
+        <div class="company_about_overlay_title">
+            <img src="static/imgs/logo.png"/>
+            <h1 class="company_name">NOYtech</h1>
+        </div>
+    </div>
+
+    <div class="card-body">
+         <!-- Tab links -->
+        <div class="tab">
+            <button class="tablinks" onclick="openCity(event, 'add_category')" id="defaultOpen">Добавить категорию</button>
+            <button class="tablinks" onclick="openCity(event, 'add_group')">Добавить группу</button>
+            <button class="tablinks" onclick="openCity(event, 'rem_category')">Удалить категорию</button>
+            <button class="tablinks" onclick="openCity(event, 'rem_group')">Удалить группу</button>
+        </div>
+        
+        <!-- Tab content -->
+        <div id="add_category" class="tabcontent">
+            <form method="post">  
+                <div class="form-group card-body">     
+                    <input type="text" name="category" placeholder="Категория" class="form-control"
+                        value="{{ request.form['сategory'] }}"></input>
+                </div>
+                <div class="form-group card-body">
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="add_group" class="tabcontent">
+            <form method="post">  
+                <div class="form-group card-body">     
+                    <input type="text" name="group" placeholder="Группа" class="form-control"
+                        value="{{ request.form['group'] }}"></input>
+                </div>
+                <div class="form-group card-body">
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="rem_category" class="tabcontent">
+            <form method="post">  
+                <div class="form-floating card-body">
+                    <select class="form-select" name="select_category" id="floatingSelect" aria-label="Floating label select example">
+                        <option value="" selected>Выберите категорию</option>
+                        {% for value in data['select_category'] %}
+                            <option value="{{ value }}">{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group card-body">
+                    <button type="submit" class="btn btn-primary">Удалить</button>
+                </div>
+            </form>
+       </div>
+        
+        <div id="rem_group" class="tabcontent">
+            <form method="post">  
+                <div class="form-floating card-body">
+                    <select class="form-select" name="select_group" id="floatingSelect" aria-label="Floating label select example">
+                        <option value="" selected>Выберите группу</option>
+                        {% for value in data['select_group'] %}
+                            <option value="{{ value }}">{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group card-body">
+                    <button type="submit" class="btn btn-primary">Удалить</button>
+                </div>
+            </form>
+        </div> 
+
+        <script>
+            // Get the element with id="defaultOpen" and click on it
+            document.getElementById("defaultOpen").click();
+
+            function openCity(evt, cityName) {
+                // Declare all variables
+                var i, tabcontent, tablinks;
+
+                // Get all elements with class="tabcontent" and hide them
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+
+                // Get all elements with class="tablinks" and remove the class "active"
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+
+                // Show the current tab, and add an "active" class to the button that opened the tab
+                document.getElementById(cityName).style.display = "block";
+                evt.currentTarget.className += " active";
+            } 
+        </script>
+    </div>
+
+{% endblock %}
+

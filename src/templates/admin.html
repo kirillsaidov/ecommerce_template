@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <!-- IMAGE -->
+    <div class="company_about_block">
+        <div class="company_about_bg_image">
+            <img src="static/imgs/bg_tech.jpg" alt="image" style="width:100%;">
+        </div>
+        <div class="company_about_overlay_title">
+            <img src="static/imgs/logo.png"/>
+            <h1 class="company_name">NOYtech</h1>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <div>
+            <div class="card-body py-5 px-md-5">
+                <div class="row d-flex justify-content-center">
+                    <form method="post">
+                        <!-- Email input -->
+                        <div class="form-outline mb-4">
+                            <input type="username" name="username" class="form-control" value="{{ request.form['username'] }}"/>
+                            <label class="form-label" for="username">Username</label>
+                        </div>
+
+                        <!-- Password input -->
+                        <div class="form-outline mb-4">
+                            <input type="password" name="password" class="form-control" value="{{ request.form['password'] }}"/>
+                            <label class="form-label" for="password">Password</label>
+                        </div>
+
+                        <!-- Submit button -->
+                        <button type="submit" class="btn btn-primary btn-block mb-4">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+

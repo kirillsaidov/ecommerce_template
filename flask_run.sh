@@ -2,5 +2,5 @@
 
 # flask run
 cd src/
-python3 app.py
+python3.11 app.py
 

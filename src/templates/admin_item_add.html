@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <!-- IMAGE -->
+    <div class="company_about_block">
+        <div class="company_about_bg_image">
+            <img src="static/imgs/bg_tech.jpg" alt="image" style="width:100%;">
+        </div>
+        <div class="company_about_overlay_title">
+            <img src="static/imgs/logo.png"/>
+            <h1 class="company_name">NOYtech</h1>
+        </div>
+    </div>
+
+    <!-- nav bar -->
+    <nav class="navbar bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand">Товары</a>
+            <form class="d-flex card-body" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+            <form method="post">
+                <button class="btn btn-primary" type="submit" name="button_item" value="add">Добавить товар</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- items list -->
+    <div class="card-body">
+        <ol class="list-group list-group-numbered">
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                <div class="fw-bold">Subheading</div>
+                Content for list item
+                </div>
+              <span class="badge text-bg-primary rounded-pill">14</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                <div class="fw-bold">Subheading</div>
+                Content for list item
+                </div>
+              <span class="badge text-bg-primary rounded-pill">14</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                <div class="fw-bold">Subheading</div>
+                Content for list item
+                </div>
+              <span class="badge text-bg-primary rounded-pill">14</span>
+            </li>
+        </ol>
+    </div>
+
+{% endblock %}
+

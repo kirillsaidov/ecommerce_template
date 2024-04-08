@@ -1,4 +1,5 @@
 # custom
+venv/
 lib/
 bin/
 archive/
