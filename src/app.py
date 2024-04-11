@@ -239,6 +239,15 @@ def admin_constructor():
     })
 
 
+@app.route('/item_view/<string:id>')
+def item_view():
+    return render_template('item_view.html', data={
+        'footer': preload_data['footer'],
+        'about': preload_data['about'],
+        'item': None,
+    })
+
+
 if __name__ == "__main__":
     try:
         startup()

@@ -92,6 +92,16 @@ def aux_db_get_brands(db: Database) -> list:
 
 
 def aux_db_add_item(db: Database, item: dict):
+    # add categories
+    aux_db_add_category(db, item['category'])
+
+    # add groups
+    aux_db_add_group(db, item['group'])
+
+    # add brands
+    aux_db_add_brand(db, item['brand'])
+
+    # add item
     col = db['items']
     entry = col.find_one({'title': item['title']})
     if entry:
