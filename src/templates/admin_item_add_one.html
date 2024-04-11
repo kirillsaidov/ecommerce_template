@@ -83,6 +83,21 @@
                         </div>
                     </div>
                     
+                    <!-- brand -->
+                    <div class="card-body row">
+                        <div class="col col-lg-2">
+                            <span class="input-group-text">*Бренд</span>
+                        </div>
+                        <div class="col">
+                            <select class="form-select" name="select_brand" id="floatingSelect" aria-label="Floating label select example" required>
+                                <option value="">Выберите бренд</option>
+                                {% for value in data['select_brand'] %}
+                                    <option value="{{ value }}">{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
                     <!-- picture 1 -->
                     <div class="card-body row">
                         <div class="col col-lg-2">

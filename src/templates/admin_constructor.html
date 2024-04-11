@@ -17,10 +17,12 @@
     <div class="card-body">
          <!-- Tab links -->
         <div class="tab">
-            <button class="tablinks" onclick="openCity(event, 'add_category')" id="defaultOpen">Добавить категорию</button>
-            <button class="tablinks" onclick="openCity(event, 'add_group')">Добавить группу</button>
-            <button class="tablinks" onclick="openCity(event, 'rem_category')">Удалить категорию</button>
-            <button class="tablinks" onclick="openCity(event, 'rem_group')">Удалить группу</button>
+            <button class="tablinks" onclick="openTab(event, 'add_category')" id="defaultOpen">Добавить категорию</button>
+            <button class="tablinks" onclick="openTab(event, 'add_group')">Добавить группу</button>
+            <button class="tablinks" onclick="openTab(event, 'add_brand')">Добавить бренд</button>
+            <button class="tablinks" onclick="openTab(event, 'rem_category')">Удалить категорию</button>
+            <button class="tablinks" onclick="openTab(event, 'rem_group')">Удалить группу</button>
+            <button class="tablinks" onclick="openTab(event, 'rem_brand')">Удалить бренд</button>
         </div>
         
         <!-- Tab content -->
@@ -41,6 +43,18 @@
                 <div class="form-group card-body">     
                     <input type="text" name="group" placeholder="Группа" class="form-control"
                         value="{{ request.form['group'] }}"></input>
+                </div>
+                <div class="form-group card-body">
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="add_brand" class="tabcontent">
+            <form method="post">  
+                <div class="form-group card-body">     
+                    <input type="text" name="brand" placeholder="Бренд" class="form-control"
+                        value="{{ request.form['brand'] }}"></input>
                 </div>
                 <div class="form-group card-body">
                     <button type="submit" class="btn btn-primary">Добавить</button>
@@ -80,11 +94,27 @@
             </form>
         </div> 
 
+        <div id="rem_brand" class="tabcontent">
+            <form method="post">  
+                <div class="form-floating card-body">
+                    <select class="form-select" name="select_brand" id="floatingSelect" aria-label="Floating label select example">
+                        <option value="" selected>Выберите группу</option>
+                        {% for value in data['select_brand'] %}
+                            <option value="{{ value }}">{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group card-body">
+                    <button type="submit" class="btn btn-primary">Удалить</button>
+                </div>
+            </form>
+        </div> 
+
         <script>
             // Get the element with id="defaultOpen" and click on it
             document.getElementById("defaultOpen").click();
 
-            function openCity(evt, cityName) {
+            function openTab(evt, tabName) {
                 // Declare all variables
                 var i, tabcontent, tablinks;
 
@@ -101,7 +131,7 @@
                 }
 
                 // Show the current tab, and add an "active" class to the button that opened the tab
-                document.getElementById(cityName).style.display = "block";
+                document.getElementById(tabName).style.display = "block";
                 evt.currentTarget.className += " active";
             } 
         </script>

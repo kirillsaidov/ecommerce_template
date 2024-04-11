@@ -140,11 +140,11 @@ def admin_item_add_one():
             'description': request.form['description'],
             'category': request.form['select_category'],
             'group': request.form['select_group'],
+            'brand': request.form['select_brand'],
             'pic1': request.form['pic1'],
             'pic2': request.form['pic2'],
             'pic3': request.form['pic3'],
         }
-        # TODO: add brand (to constructor + add_one)
         aux.aux_db_add_item(app.db, item=item_info)
 
         # reload page form with empty fields
@@ -155,15 +155,16 @@ def admin_item_add_one():
         'about': preload_data['about'],
         'select_category': aux.aux_db_get_categories(app.db),
         'select_group': aux.aux_db_get_groups(app.db),
+        'select_brand': aux.aux_db_get_brands(app.db),
     })
 
 
-@app.route('/admin_item_load', methods=('GET', 'POST'))
-def admin_item_load():
+@app.route('/admin_item_add_excel', methods=('GET', 'POST'))
+def admin_item_add_excel():
     if not app.login:
         return redirect('admin')
     
-    return render_template('admin_item_load.html', login=app.login, data={
+    return render_template('admin_item_add_excel.html', login=app.login, data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
     })
@@ -183,6 +184,10 @@ def admin_constructor():
             form_group = request.form['group']
             if len(form_group):
                 aux.aux_db_add_group(app.db, form_group)
+        if 'brand' in request.form:
+            form_brand = request.form['brand']
+            if len(form_brand):
+                aux.aux_db_add_brand(app.db, form_brand)
         if 'select_category' in request.form:
             form_select_category = request.form['select_category']
             if len(form_select_category):
@@ -191,12 +196,17 @@ def admin_constructor():
             form_select_group = request.form['select_group']
             if len(form_select_group):
                 aux.aux_db_rem_group(app.db, form_select_group)
+        if 'select_brand' in request.form:
+            form_select_brand = request.form['select_brand']
+            if len(form_select_brand):
+                aux.aux_db_rem_brand(app.db, form_select_brand)
 
     return render_template('admin_constructor.html', login=app.login, data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
         'select_category': aux.aux_db_get_categories(app.db),
         'select_group': aux.aux_db_get_groups(app.db),
+        'select_brand': aux.aux_db_get_brands(app.db),
     })
 
 
