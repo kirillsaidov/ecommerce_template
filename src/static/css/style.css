@@ -85,3 +85,7 @@
     border-top: none;
 } 
 
+select {
+    width: 100%;
+    vertical-align: middle;
+}

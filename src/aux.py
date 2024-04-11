@@ -62,3 +62,10 @@ def aux_db_get_groups(db: Database) -> list:
     entry = col.find_one({'groups': {'$exists': 1}})
     return entry['groups'] if entry else list()
 
+
+def aux_db_add_item(db: Database, item: dict):
+    col = db['items']
+    if not col.find_one(item):
+        col.insert_one(item)
+
+

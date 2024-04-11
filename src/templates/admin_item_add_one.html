@@ -15,7 +15,112 @@
 
     <!-- items list -->
     <div class="card-body">
-        <p>hello</p>
+        <div class="card text-center">
+            <form method="post" name="item_add">  
+                <!-- header -->
+                <div class="card-header">Добавить товар</div>
+
+                <!-- info -->
+                <div class="card-body container text-center">
+
+                    <!-- title -->
+                    <div class="card-body row">
+                        <div class="col col-lg-2">
+                            <span class="input-group-text">*Название</span> 
+                        </div>
+                        <div class="col">
+                            <input type="text" name="title" placeholder="Монитор 27' Acer NITRO ED270UP2bmiipx, Black" class="form-control" value="{{ request.form['title'] }}" required></input>
+                        </div>  
+                    </div>
+
+                    <!-- price -->
+                    <div class="card-body row">
+                        <div class="col col-lg-2">
+                            <span class="input-group-text">*Цена</span>
+                        </div>
+                        <div class="col">
+                            <input type="number" required data-type="number" name="price" placeholder="2500" min="0.00" class="form-control" value="{{ request.form['price'] }}" required></input>
+                        </div>  
+                    </div>
+
+                    <!-- description -->
+                    <div class="card-body row">
+                        <div class="col col-lg-2">
+                            <span class="input-group-text">*Описание</span>
+                        </div>
+                        <div class="col">
+                            <textarea class="form-control" aria-label="With textarea" type="text" name="description" placeholder="Опиcание" value="{{ request.form['description'] }}" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- category -->
+                    <div class="card-body row">
+                        <div class="col col-lg-2">
+                            <span class="input-group-text">*Категория</span>
+                        </div>
+                        <div class="col">
+                            <select class="form-select" name="select_category" id="floatingSelect" aria-label="Floating label select example" required>
+                                <option value="">Выберите категорию</option>
+                                {% for value in data['select_category'] %}
+                                    <option value="{{ value }}">{{ value }}</option>
+                                {% endfor %}
+                            </select> 
+                        </div>
+                    </div>
+
+                    <!-- group -->
+                    <div class="card-body row">
+                        <div class="col col-lg-2">
+                            <span class="input-group-text">*Группа</span>
+                        </div>
+                        <div class="col">
+                            <select class="form-select" name="select_group" id="floatingSelect" aria-label="Floating label select example" required>
+                                <option value="">Выберите группу</option>
+                                {% for value in data['select_group'] %}
+                                    <option value="{{ value }}">{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- picture 1 -->
+                    <div class="card-body row">
+                        <div class="col col-lg-2">
+                            <span class="input-group-text">*Картинка 1</span> 
+                        </div>
+                        <div class="col">
+                            <input type="url" name="pic1" placeholder="url" class="form-control" value="{{ request.form['pic1'] }}" required></input>
+                        </div>  
+                    </div>
+
+                    <!-- picture 2 -->
+                    <div class="card-body row">
+                        <div class="col col-lg-2">
+                            <span class="input-group-text">Картинка 2</span> 
+                        </div>
+                        <div class="col">
+                            <input type="url" name="pic2" placeholder="url" class="form-control" value="{{ request.form['pic2'] }}"></input>
+                        </div>  
+                    </div>
+
+                    <!-- picture 3 -->
+                    <div class="card-body row">
+                        <div class="col col-lg-2">
+                            <span class="input-group-text">Картинка 3</span> 
+                        </div>
+                        <div class="col">
+                            <input type="url" name="pic3" placeholder="url" class="form-control" value="{{ request.form['pic3'] }}"></input>
+                        </div>  
+                    </div>
+
+                </div>
+
+                <!-- button -->
+                <div class="form-group card-body">
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                </div>
+            </form>
+        </div>
     </div>
 
 {% endblock %}

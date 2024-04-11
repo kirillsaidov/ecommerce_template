@@ -132,9 +132,29 @@ def admin_item_add_one():
     if not app.login:
        return redirect('admin')
     
+    # process request
+    if request.method == 'POST':
+        item_info = {
+            'title': request.form['title'],
+            'price': request.form['price'],
+            'description': request.form['description'],
+            'category': request.form['select_category'],
+            'group': request.form['select_group'],
+            'pic1': request.form['pic1'],
+            'pic2': request.form['pic2'],
+            'pic3': request.form['pic3'],
+        }
+        # TODO: add brand (to constructor + add_one)
+        aux.aux_db_add_item(app.db, item=item_info)
+
+        # reload page form with empty fields
+        return redirect('admin_item_add_one')
+
     return render_template('admin_item_add_one.html', login=app.login, data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
+        'select_category': aux.aux_db_get_categories(app.db),
+        'select_group': aux.aux_db_get_groups(app.db),
     })
 
 
