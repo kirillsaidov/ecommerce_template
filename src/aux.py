@@ -93,7 +93,12 @@ def aux_db_get_brands(db: Database) -> list:
 
 def aux_db_add_item(db: Database, item: dict):
     col = db['items']
-    if not col.find_one(item):
+    entry = col.find_one({'title': item['title']})
+    if entry:
+        col.update_one(entry, {
+            '$set': item,
+        })
+    else:
         col.insert_one(item)
 
 

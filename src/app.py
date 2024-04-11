@@ -1,13 +1,20 @@
 # module app
 
 # system
+import os
+import io
 from datetime import datetime, timedelta
 
 # web
 from flask import Flask, render_template, request, url_for, flash, redirect
+from werkzeug.utils import secure_filename
 
 # db
 from pymongo import MongoClient
+
+# data processing
+import numpy as np
+import pandas as pd
 
 # custom
 import data
@@ -19,6 +26,7 @@ app.config['ADMIN_PASSWORD'] = 'admin'
 app.config['ADMIN_SESSION_TIME'] = timedelta(hours=3)
 app.config['ADMIN_SESSION_LAST'] = datetime.now()
 app.config['SECRET_KEY'] = '0123456789'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.login = True
 preload_data = {
     'about': open('static/info/about.txt', 'r').read().split('\n'),
@@ -163,7 +171,28 @@ def admin_item_add_one():
 def admin_item_add_excel():
     if not app.login:
         return redirect('admin')
-    
+
+    # process request
+    if request.method == 'POST':
+        # save file
+        file_io = io.BytesIO()
+        file = request.files['file']
+        file.save(file_io)
+
+        # read to pandas
+        df = pd.read_excel(file_io)
+        for i in range(len(df)):
+            # convert row to dict
+            item = df.iloc[i].to_dict()
+
+            # replace nan
+            for key in item.keys():
+                if pd.isna(item[key]): item[key] = ''
+
+            # validate (title is unique)
+            aux.aux_db_add_item(app.db, item)
+            
+
     return render_template('admin_item_add_excel.html', login=app.login, data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
