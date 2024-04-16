@@ -133,8 +133,9 @@ def aux_db_get_items(db: Database) -> list:
 
 def aux_db_find_item(db: Database, id: ObjectId) -> dict:
     col = db['items']
-    entry = col.find_one({'_id': id})
-    return entry
+    item = col.find_one({'_id': id})
+    if item: item['id'] = str(item['_id']) 
+    return item
 
 
 def aux_chunks(lst, step):
