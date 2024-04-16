@@ -125,10 +125,20 @@ def admin_item_view(page_num: int):
     if not app.login:
        return redirect('admin')
     
+    # init
+    sort_by_default = {
+        'select_category': 'Сортировка по категории',
+        'select_group': 'Сортировка по группе',
+        'select_brand': 'Сортировка по бренду',
+        'select_price': 'Сортировка по цене',
+    }
+    sort_by = dict(sort_by_default)
+    
     # process request
-    # if request.method == 'POST':
-    #     if request.form.get('button') == 'item_add':
-    #         return redirect('admin_item_add_one')
+    if request.method == 'POST':
+        for key in sort_by.keys():
+            if len(request.form[key]):
+                sort_by[key] = request.form[key]
 
     # init pages info
     page_info = {
@@ -136,13 +146,25 @@ def admin_item_view(page_num: int):
         'items_per_row': 3,
     }
 
-    # get all items and split into pages
+    # get all items
     items = aux.aux_db_get_items(app.db)
+
+    # sort items 
+    for key in sort_by.keys():
+        if sort_by[key] != sort_by_default[key]:
+            if key == 'select_price':
+                items = sorted(items, key=lambda x: x['price'], reverse=sort_by[key] != 'С начала дешевле')
+            else:
+                items = list(filter(
+                    lambda x: x[key.split('_')[-1]] == sort_by[key], items
+                ))
+
+    # split into pages
     items_split_page = list(aux.aux_chunks(items, page_info['items_per_page']))
 
     # split page content into rows
     items_split_row = list()
-    for items_page in items_split_page: 
+    for items_page in items_split_page:
         items_split_row.append(list(aux.aux_chunks(items_page, page_info['items_per_row'])))
 
     # update data
@@ -156,6 +178,10 @@ def admin_item_view(page_num: int):
     return render_template('admin_item_view.html', login=app.login, data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
+        'select_category': aux.aux_db_get_categories(app.db),
+        'select_group': aux.aux_db_get_groups(app.db),
+        'select_brand': aux.aux_db_get_brands(app.db),
+        'sort_by': sort_by,
     }, page_info=page_info)        
 
 

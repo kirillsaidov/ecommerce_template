@@ -77,19 +77,34 @@ def aux_db_rem_brand(db: Database, brand: str):
 def aux_db_get_categories(db: Database) -> list:
     col = db['info']
     entry = col.find_one({'categories': {'$exists': 1}})
-    return entry['categories'] if entry else list()
+    if entry: 
+        lst: list = entry['categories']
+        lst.sort()
+        return lst
+    else: 
+        return list() 
 
 
 def aux_db_get_groups(db: Database) -> list:
     col = db['info']
     entry = col.find_one({'groups': {'$exists': 1}})
-    return entry['groups'] if entry else list()
+    if entry:
+        lst: list = entry['groups']
+        lst.sort()
+        return lst
+    else: 
+        return list()
 
 
 def aux_db_get_brands(db: Database) -> list:
     col = db['info']
     entry = col.find_one({'brands': {'$exists': 1}})
-    return entry['brands'] if entry else list()
+    if entry:
+        lst: list = entry['brands']
+        lst.sort()
+        return lst
+    else: 
+        return list()
 
 
 def aux_db_add_item(db: Database, item: dict):
