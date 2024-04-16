@@ -112,7 +112,7 @@ def admin():
 
     # check if login and redirect if neccessary
     if app.login:
-        return redirect(url_for('admin_item_add', page_num=0))
+        return redirect(url_for('admin_item_view', page_num=0))
     else:
         return render_template('admin.html', login=app.login, data={
             'footer': preload_data['footer'],
@@ -120,8 +120,8 @@ def admin():
         })
 
 
-@app.route('/admin_item_add/<int:page_num>', methods=('GET', 'POST'))
-def admin_item_add(page_num: int):
+@app.route('/admin_item_view/<int:page_num>', methods=('GET', 'POST'))
+def admin_item_view(page_num: int):
     if not app.login:
        return redirect('admin')
     
@@ -153,7 +153,7 @@ def admin_item_add(page_num: int):
         'items': items_split_row[page_num],
     })
 
-    return render_template('admin_item_add.html', login=app.login, data={
+    return render_template('admin_item_view.html', login=app.login, data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
     }, page_info=page_info)        
@@ -167,7 +167,7 @@ def admin_item_remove(id: str):
     # remove object
     aux.aux_db_rem_item(app.db, ObjectId(id))
 
-    return redirect(url_for('admin_item_add', page_num=0)) 
+    return redirect(url_for('admin_item_view', page_num=0)) 
 
 
 @app.route('/admin_item_add_one', methods=('GET', 'POST'))
