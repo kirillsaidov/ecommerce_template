@@ -10,6 +10,7 @@ from flask import Flask, render_template, request, url_for, flash, redirect
 from werkzeug.utils import secure_filename
 
 # db
+from bson.objectid import ObjectId
 from pymongo import MongoClient
 
 # data processing
@@ -111,7 +112,7 @@ def admin():
 
     # check if login and redirect if neccessary
     if app.login:
-        return redirect('admin_item_add')
+        return redirect(url_for('admin_item_add', page_num=0))
     else:
         return render_template('admin.html', login=app.login, data={
             'footer': preload_data['footer'],
@@ -119,20 +120,54 @@ def admin():
         })
 
 
-@app.route('/admin_item_add', methods=('GET', 'POST'))
-def admin_item_add():
+@app.route('/admin_item_add/<int:page_num>', methods=('GET', 'POST'))
+def admin_item_add(page_num: int):
     if not app.login:
        return redirect('admin')
-
+    
     # process request
-    if request.method == 'POST':
-        if request.form.get('button_item') == 'add':
-            return redirect('admin_item_add_one')
+    # if request.method == 'POST':
+    #     if request.form.get('button') == 'item_add':
+    #         return redirect('admin_item_add_one')
+
+    # init pages info
+    page_info = {
+        'items_per_page': 6,
+        'items_per_row': 3,
+    }
+
+    # get all items and split into pages
+    items = aux.aux_db_get_items(app.db)
+    items_split_page = list(aux.aux_chunks(items, page_info['items_per_page']))
+
+    # split page content into rows
+    items_split_row = list()
+    for items_page in items_split_page: 
+        items_split_row.append(list(aux.aux_chunks(items_page, page_info['items_per_row'])))
+
+    # update data
+    page_num = page_num if page_num < len(items_split_row) else len(items_split_row)-1 
+    page_info.update({
+        'page_num': page_num,
+        'page_num_max': len(items_split_page),
+        'items': items_split_row[page_num],
+    })
 
     return render_template('admin_item_add.html', login=app.login, data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
-    })        
+    }, page_info=page_info)        
+
+
+@app.route('/admin_item_remove/<string:id>')
+def admin_item_remove(id: str):
+    if not app.login:
+       return redirect('admin')
+    
+    # remove object
+    aux.aux_db_rem_item(app.db, ObjectId(id))
+
+    return redirect(url_for('admin_item_add', page_num=0)) 
 
 
 @app.route('/admin_item_add_one', methods=('GET', 'POST'))
@@ -240,12 +275,11 @@ def admin_constructor():
 
 
 @app.route('/item_view/<string:id>')
-def item_view():
+def item_view(id: str):
     return render_template('item_view.html', data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
-        'item': None,
-    })
+    }, item=aux.aux_db_find_item(app.db, ObjectId(id)))
 
 
 if __name__ == "__main__":

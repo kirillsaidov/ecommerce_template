@@ -21,7 +21,7 @@
         <nav class="navbar navbar-expand-md navbar-light bg-light">
             <!-- Logo -->
             <a class="navbar-brand" href="{{ url_for('index')}}">
-                <img src="static/imgs/logo.png" height="32" align="left"/>
+                <img src="{{ url_for('static', filename='imgs/logo.png') }}" height="32" align="left"/>
             </a>
             <!-- Company name -->
             <a class="navbar-brand" href="{{ url_for('index')}}">
@@ -54,7 +54,7 @@
 
                     {% if login %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{url_for('admin_item_add')}}" style="color:cornflowerblue;font-weight:bold;">Добавить товар</a>
+                            <a class="nav-link" href="{{url_for('admin_item_add', page_num=0)}}" style="color:cornflowerblue;font-weight:bold;">Добавить товар</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{url_for('admin_item_add_excel')}}" style="color:cornflowerblue;font-weight:bold;">Загрузить с Excel</a>

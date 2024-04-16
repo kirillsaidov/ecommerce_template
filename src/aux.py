@@ -1,6 +1,7 @@
 # module aux
 
 # db
+from bson.objectid import ObjectId
 from pymongo.database import Database
 
 # local
@@ -110,5 +111,39 @@ def aux_db_add_item(db: Database, item: dict):
         })
     else:
         col.insert_one(item)
+
+
+def aux_db_rem_item(db: Database, id: ObjectId):
+    col = db['items']
+    entry = col.find_one({'_id': id})
+    if entry:
+        col.delete_one({'_id': id})
+
+
+def aux_db_get_items(db: Database) -> list:
+    col = db['items']
+    items = list(col.find({}))
+
+    # convert object id to string
+    for item in items: 
+        item['id'] = str(item['_id'])
+
+    return items
+
+
+def aux_db_find_item(db: Database, id: ObjectId) -> dict:
+    col = db['items']
+    entry = col.find_one({'_id': id})
+    return entry
+
+
+def aux_chunks(lst, step):
+    """Yield successive n-sized chunks from lst.
+
+    Note:
+        use `list(aux_chunks(list, step))` to convert to list 
+    """
+    for i in range(0, len(lst), step):
+        yield lst[i:i + step]
 
 
