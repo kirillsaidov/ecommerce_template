@@ -175,6 +175,18 @@ def admin_item_view(page_num: int):
         'items': items_split_row[page_num],
     })
 
+    """ TODO: sorting
+    # sort groups based on selected category
+    _groups = aux.aux_db_get_groups(app.db) if sort_by['select_category'] == sort_by_default['select_category'] else [
+        item['group'] for item in page_info['items'][0] if item['category'] == sort_by['select_category']
+    ]
+
+    # sort brands based on selected group
+    _brands = aux.aux_db_get_brands(app.db) if sort_by['select_group'] == sort_by_default['select_group'] else [
+        item['brand'] for item in page_info['items'][0] if item['group'] == sort_by['select_group']
+    ]
+    """
+
     return render_template('admin_item_view.html', login=app.login, data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
