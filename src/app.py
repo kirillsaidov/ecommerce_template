@@ -112,7 +112,7 @@ def admin():
 
     # check if login and redirect if neccessary
     if app.login:
-        return redirect(url_for('admin_item_view', page_num=0))
+        return redirect(url_for('admin_item_view', page_num=0, sort_c='0', sort_g='0', sort_b='0', sort_p='0'))
     else:
         return render_template('admin.html', login=app.login, data={
             'footer': preload_data['footer'],
@@ -120,10 +120,15 @@ def admin():
         })
 
 
-@app.route('/admin_item_view/<int:page_num>', methods=('GET', 'POST'))
-def admin_item_view(page_num: int):
+@app.route('/admin_item_view/<int:page_num>?category=<string:sort_c>&group=<string:sort_g>&brand=<string:sort_b>&price=<string:sort_p>', methods=('GET', 'POST'))
+def admin_item_view(page_num: int, sort_c: str = '0', sort_g: str = '0', sort_b: str = '0', sort_p: str = '0'):
     if not app.login:
        return redirect('admin')
+    
+    print(f'category: {sort_c}')
+    print(f'group: {sort_g}')
+    print(f'brand: {sort_b}')
+    print(f'price: {sort_p}')
     
     # init
     sort_by_default = {
@@ -133,12 +138,23 @@ def admin_item_view(page_num: int):
         'select_price': 'Сортировка по цене',
     }
     sort_by = dict(sort_by_default)
+
+    # update sort_by
+    sort_by.update({
+        'select_category': 'Сортировка по категории' if sort_c == '0' else sort_c,
+        'select_group': 'Сортировка по группе' if sort_g == '0' else sort_g,
+        'select_brand': 'Сортировка по бренду' if sort_b == '0' else sort_b,
+        'select_price': 'Сортировка по цене' if sort_p == '0' else sort_p,
+    })
     
     # process request
     if request.method == 'POST':
         for key in sort_by.keys():
-            if len(request.form[key]):
-                sort_by[key] = request.form[key]
+            sort_by[key] = request.form[key] if len(request.form[key]) else sort_by_default[key]
+        
+    # forward to page 0 when we change category (if we are currently on Nth page)
+    if sort_c != sort_by['select_category']:
+        page_num = 0
 
     # init pages info
     page_info = {
@@ -150,49 +166,60 @@ def admin_item_view(page_num: int):
     items = aux.aux_db_get_items(app.db)
 
     # sort items 
-    for key in sort_by.keys():
-        if sort_by[key] != sort_by_default[key]:
-            if key == 'select_price':
-                items = sorted(items, key=lambda x: x['price'], reverse=sort_by[key] != 'С начала дешевле')
-            else:
-                items = list(filter(
-                    lambda x: x[key.split('_')[-1]] == sort_by[key], items
-                ))
+    def create_page_info(items: list, page_num: int) -> dict:
+        for key in sort_by.keys():
+            if sort_by[key] != sort_by_default[key]:
+                if key == 'select_price':
+                    items = sorted(items, key=lambda x: x['price'], reverse=sort_by[key] != 'С начала дешевле')
+                else:
+                    items = list(filter(
+                        lambda x: x[key.split('_')[-1]] == sort_by[key], items
+                    ))
 
-    # split into pages
-    items_split_page = list(aux.aux_chunks(items, page_info['items_per_page']))
+        # split into pages
+        items_split_page = list(aux.aux_chunks(items, page_info['items_per_page']))
 
-    # split page content into rows
-    items_split_row = list()
-    for items_page in items_split_page:
-        items_split_row.append(list(aux.aux_chunks(items_page, page_info['items_per_row'])))
+        # split page content into rows
+        items_split_row = list()
+        for items_page in items_split_page:
+            items_split_row.append(list(aux.aux_chunks(items_page, page_info['items_per_row'])))
 
-    # update data
-    page_num = page_num if page_num < len(items_split_row) else len(items_split_row)-1 
-    page_info.update({
-        'page_num': page_num,
-        'page_num_max': len(items_split_page),
-        'items': items_split_row[page_num],
-    })
+        # update data
+        page_num = page_num if page_num < len(items_split_row) else len(items_split_row)-1 
+        page_info.update({
+            'page_num': page_num,
+            'page_num_max': len(items_split_page),
+            'items': items_split_row[page_num] if len(items_split_row) else list(),
+        })
 
-    """ TODO: sorting
+        return page_info
+
+    # generate page_info
+    page_info = create_page_info(items, page_num)
+
+    # check if data is selected correctly
+    if not len(page_info['items']):
+        sort_by['select_group'] = sort_by_default['select_group']
+        sort_by['select_brand'] = sort_by_default['select_brand']
+        page_num = 0
+        page_info = create_page_info(items, page_num)
+
     # sort groups based on selected category
-    _groups = aux.aux_db_get_groups(app.db) if sort_by['select_category'] == sort_by_default['select_category'] else [
+    _groups = aux.aux_db_get_groups(app.db) if sort_by['select_category'] == sort_by_default['select_category'] or not len(page_info['items']) else [
         item['group'] for item in page_info['items'][0] if item['category'] == sort_by['select_category']
     ]
 
     # sort brands based on selected group
-    _brands = aux.aux_db_get_brands(app.db) if sort_by['select_group'] == sort_by_default['select_group'] else [
-        item['brand'] for item in page_info['items'][0] if item['group'] == sort_by['select_group']
+    _brands = aux.aux_db_get_brands(app.db) if sort_by['select_category'] == sort_by_default['select_category'] or not len(page_info['items']) else [
+        item['brand'] for item in page_info['items'][0] if item['group'] == sort_by['select_group'] or sort_by['select_group'] == sort_by_default['select_group']
     ]
-    """
 
     return render_template('admin_item_view.html', login=app.login, data={
         'footer': preload_data['footer'],
         'about': preload_data['about'],
         'select_category': aux.aux_db_get_categories(app.db),
-        'select_group': aux.aux_db_get_groups(app.db),
-        'select_brand': aux.aux_db_get_brands(app.db),
+        'select_group': _groups,
+        'select_brand': _brands,
         'sort_by': sort_by,
     }, page_info=page_info)        
 
@@ -205,7 +232,7 @@ def admin_item_remove(id: str):
     # remove object
     aux.aux_db_rem_item(app.db, ObjectId(id))
 
-    return redirect(url_for('admin_item_view', page_num=0)) 
+    return redirect(url_for('admin_item_view', page_num=0, sort_c='0', sort_g='0', sort_b='0', sort_p='0')) 
 
 
 @app.route('/admin_item_add_one', methods=('GET', 'POST'))
