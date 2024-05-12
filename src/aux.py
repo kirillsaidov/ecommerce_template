@@ -3,9 +3,7 @@
 # db
 from bson.objectid import ObjectId
 from pymongo.database import Database
-
-# local
-import data
+from elasticsearch import Elasticsearch
 
 
 def aux_db_add_category(db: Database, category: str):
@@ -142,6 +140,7 @@ def aux_db_get_items(db: Database) -> list:
     # convert object id to string
     for item in items: 
         item['id'] = str(item['_id'])
+        del item['_id']
 
     return items
 
@@ -161,5 +160,77 @@ def aux_chunks(lst, step):
     """
     for i in range(0, len(lst), step):
         yield lst[i:i + step]
+
+
+def aux_es_create_index(es: Elasticsearch, index: str, mappings: dict) -> bool:
+    """Create index if does not exist
+
+    Args:
+        es (Elasticsearch): es engine
+        index (str): index string
+        mappings (dict): mappings
+
+    Returns:
+        bool: True upon success, False if already exists
+    """
+    if not es.indices.exists(index=index): 
+        es.indices.create(index=index, mappings=mappings)
+        return True
+    return False
+
+
+def aux_es_add_docs(es: Elasticsearch, index: str, documents: list):
+    """Add documents to engine
+
+    Args:
+        es (Elasticsearch): es engine
+        index (str): index string
+        documents (list): documents
+    """
+    for idx, doc in enumerate(documents):
+        es.index(index=index, id=idx, body=doc)
+
+
+def aux_es_search(es: Elasticsearch, index: str, search: str, get_docs: bool = True) -> list:
+    """Search
+
+    Args:
+        es (Elasticsearch): es engine
+        index (str): index string
+        search (str): search string
+        get_docs (bool, optional): get original documents instead of search response document. Defaults to True.
+
+    Returns:
+        list: list of documents
+
+    Note:
+        mappings: {
+            "properties": {
+                "title": {"type": "text", "analyzer": "standard"},
+                "content": {"type": "text", "analyzer": "standard"},
+                "price": {"type": "integer"},
+            }
+        }
+    """
+    resp = es.search(index=index, body={
+        'query': {
+            'match': {
+                'content': search
+            }
+        }
+    })
+
+    # find all hits
+    hits = []
+    for hit in resp['hits']['hits']:
+        hits.append(hit['_source'] if get_docs else hit)
+
+    return hits
+
+
+def aux_es_update_index_from_db(es: Elasticsearch, index: str, db: Database):
+    items = aux_db_get_items(db)
+    aux_es_add_docs(es, index, items)
+
 
 

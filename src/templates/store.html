@@ -24,10 +24,9 @@
                         <div class="container-fluid">
                             <a class="navbar-brand">Товары</a>
                             <div class="d-flex card-body">
-                                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                                <input class="form-control me-2" type="search" placeholder="Search" name="es_search" value="{{ request.form['es_search'] }}">
                                 <button class="btn btn-outline-success" type="submit">Поиск</button>
                             </div>
-                            <a href="{{ url_for('admin_item_add_one') }}" class="btn btn-primary" type="submit" name="button" value="item_add">Добавить товар</a>
                         </div>
 
                         <!-- sort by -->
@@ -116,7 +115,6 @@
                                     <div class="card-footer">
                                         <form method="post">
                                             <a href="{{ url_for('item_view', id=item['id']) }}" class="btn btn-primary">Посмотреть</a>
-                                            <a href="{{ url_for('admin_item_remove', id=item['id']) }}" class="btn btn-primary" style="background-color: red;border-color: red;">Удалить</a>
                                         </form> 
                                     </div>
                                 </div>
@@ -130,12 +128,12 @@
         <!-- navigation button -->
         <div class="card-body">
             <nav class="nav nav-pills flex-column flex-sm-row justify-content-center">
-                <a href="{{ url_for('admin_item_view', page_num=page_info['page_num']-1 if page_info['page_num'] else 0, sort_c=data['sort_by']['select_category'], sort_g=data['sort_by']['select_group'], sort_b=data['sort_by']['select_brand'], sort_p=data['sort_by']['select_price']) }}" class="btn btn-primary">&#8249;</a>
+                <a href="{{ url_for('store', page_num=page_info['page_num']-1 if page_info['page_num'] else 0, sort_c=data['sort_by']['select_category'], sort_g=data['sort_by']['select_group'], sort_b=data['sort_by']['select_brand'], sort_p=data['sort_by']['select_price']) }}" class="btn btn-primary">&#8249;</a>
                 <label class="input-group-text form-label" style="background-color:transparent;outline:transparent;border:none;">{{ page_info['page_num'] + 1 }} / {{ page_info['page_num_max'] }}</label>
-                <a href="{{ url_for('admin_item_view', page_num=page_info['page_num']+1 if page_info['page_num'] < page_info['page_num_max']-1 else page_info['page_num'], sort_c=data['sort_by']['select_category'], sort_g=data['sort_by']['select_group'], sort_b=data['sort_by']['select_brand'], sort_p=data['sort_by']['select_price']) }}" class="btn btn-primary">&#8250;</a>
+                <a href="{{ url_for('store', page_num=page_info['page_num']+1 if page_info['page_num'] < page_info['page_num_max']-1 else page_info['page_num'], sort_c=data['sort_by']['select_category'], sort_g=data['sort_by']['select_group'], sort_b=data['sort_by']['select_brand'], sort_p=data['sort_by']['select_price']) }}" class="btn btn-primary">&#8250;</a>
             </nav>
         </div>
     </div>
-    
+
 {% endblock %}
 

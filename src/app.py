@@ -6,19 +6,20 @@ import io
 from datetime import datetime, timedelta
 
 # web
-from flask import Flask, render_template, request, url_for, flash, redirect
-from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request, url_for, redirect
 
 # db
 from bson.objectid import ObjectId
 from pymongo import MongoClient
+
+# elastic search engine
+from elasticsearch import Elasticsearch
 
 # data processing
 import numpy as np
 import pandas as pd
 
 # custom
-import data
 import aux
 
 app = Flask(__name__)
@@ -36,20 +37,153 @@ preload_data = {
 
 
 def startup():
+    # init mongo
     app.mongo_client = MongoClient('mongodb://localhost:27017/')
     app.db = app.mongo_client['config']
+
+    # init elastic search engine
+    app.es_index = 'info'
+    app.es_engine = Elasticsearch("http://localhost:9200")
+    aux.aux_es_create_index(app.es_engine, app.es_index, {
+        'properties': {
+            'id': {'type': 'text'},
+            'title': {'type': 'text', 'analyzer': 'standard'},
+            'description': {'type': 'text', 'analyzer': 'standard'},
+            'price': {'type': 'integer'},
+            'category': {'type': 'text', 'analyzer': 'standard'},
+            'group': {'type': 'text', 'analyzer': 'standard'},
+            'brand': {'type': 'text', 'analyzer': 'standard'},
+            'pic1': {'type': 'text'},
+            'pic2': {'type': 'text'},
+            'pic3': {'type': 'text'},
+        }
+    })
+
+    # update es index
+    aux.aux_es_update_index_from_db(app.es_engine, app.es_index, app.db)
 
 
 def shutdown():
     if app.mongo_client:
         app.mongo_client.close()
+    
+    # delete elastic search index
+    app.es_engine.indices.delete(index=app.es_index)
 
 
 @app.route('/')
 def index():
-    return render_template('index.html', data={
-        'footer': preload_data['footer'],
+    return redirect(url_for('store', page_num=0, sort_c='0', sort_g='0', sort_b='0', sort_p='0'))
+
+
+@app.route('/store/<int:page_num>?category=<string:sort_c>&group=<string:sort_g>&brand=<string:sort_b>&price=<string:sort_p>', methods=('GET', 'POST'))
+def store(page_num: int, sort_c: str = '0', sort_g: str = '0', sort_b: str = '0', sort_p: str = '0'):    
+    # init
+    sort_by_default = {
+        'select_category': 'Сортировка по категории',
+        'select_group': 'Сортировка по группе',
+        'select_brand': 'Сортировка по бренду',
+        'select_price': 'Сортировка по цене',
+    }
+    sort_by = dict(sort_by_default)
+
+    # update sort_by
+    sort_by.update({
+        'select_category': 'Сортировка по категории' if sort_c == '0' else sort_c,
+        'select_group': 'Сортировка по группе' if sort_g == '0' else sort_g,
+        'select_brand': 'Сортировка по бренду' if sort_b == '0' else sort_b,
+        'select_price': 'Сортировка по цене' if sort_p == '0' else sort_p,
     })
+    
+    # process request
+    es_search = ''
+    if request.method == 'POST':
+        es_search = request.form['es_search']
+        for key in sort_by.keys():
+            sort_by[key] = request.form[key] if len(request.form[key]) else sort_by_default[key]
+        
+    # forward to page 0 when we change category (if we are currently on Nth page)
+    if sort_c != sort_by['select_category']:
+        page_num = 0
+
+    # init pages info
+    page_info = {
+        'items_per_page': 6,
+        'items_per_row': 3,
+    }        
+
+    # find all items with elastic search
+    items = []
+    if len(es_search):
+        items = aux.aux_es_search(app.es_engine, app.es_index, es_search)
+        print(items)
+    else: # get all items
+        items = aux.aux_db_get_items(app.db) 
+
+    # filter items based on es_search
+    # if len(es_found):
+    #     result = []
+    #     for item in items:
+    #         for found_item in es_found:
+    #             if item['']
+
+    # sort items 
+    def create_page_info(items: list, page_num: int) -> dict:
+        for key in sort_by.keys():
+            if sort_by[key] != sort_by_default[key]:
+                if key == 'select_price':
+                    items = sorted(items, key=lambda x: x['price'], reverse=sort_by[key] != 'С начала дешевле')
+                else:
+                    items = list(filter(
+                        lambda x: x[key.split('_')[-1]] == sort_by[key], items
+                    ))
+
+        # split into pages
+        items_split_page = list(aux.aux_chunks(items, page_info['items_per_page']))
+
+        # split page content into rows
+        items_split_row = list()
+        for items_page in items_split_page:
+            items_split_row.append(list(aux.aux_chunks(items_page, page_info['items_per_row'])))
+
+        # update data
+        page_num = page_num if page_num < len(items_split_row) else len(items_split_row)-1 
+        page_info.update({
+            'page_num': page_num,
+            'page_num_max': len(items_split_page),
+            'items': items_split_row[page_num] if len(items_split_row) else list(),
+        })
+
+        return page_info
+
+    # generate page_info
+    page_info = create_page_info(items, page_num)
+
+    # check if data is selected correctly
+    if not len(page_info['items']):
+        sort_by['select_group'] = sort_by_default['select_group']
+        sort_by['select_brand'] = sort_by_default['select_brand']
+        page_num = 0
+        page_info = create_page_info(items, page_num)
+
+    # sort groups based on selected category
+    _groups = aux.aux_db_get_groups(app.db) if sort_by['select_category'] == sort_by_default['select_category'] or not len(page_info['items']) else [
+        item['group'] for item in page_info['items'][0] if item['category'] == sort_by['select_category']
+    ]
+
+    # sort brands based on selected group
+    _brands = aux.aux_db_get_brands(app.db) if sort_by['select_category'] == sort_by_default['select_category'] or not len(page_info['items']) else [
+        item['brand'] for item in page_info['items'][0] if item['group'] == sort_by['select_group'] or sort_by['select_group'] == sort_by_default['select_group']
+    ]
+
+    return render_template('store.html', data={
+        'footer': preload_data['footer'],
+        'about': preload_data['about'],
+        'select_category': aux.aux_db_get_categories(app.db),
+        'select_group': _groups,
+        'select_brand': _brands,
+        'sort_by': sort_by,
+    }, page_info=page_info)
 
 
 @app.route('/about')
@@ -124,11 +258,6 @@ def admin():
 def admin_item_view(page_num: int, sort_c: str = '0', sort_g: str = '0', sort_b: str = '0', sort_p: str = '0'):
     if not app.login:
        return redirect('admin')
-    
-    print(f'category: {sort_c}')
-    print(f'group: {sort_g}')
-    print(f'brand: {sort_b}')
-    print(f'price: {sort_p}')
     
     # init
     sort_by_default = {
@@ -232,6 +361,11 @@ def admin_item_remove(id: str):
     # remove object
     aux.aux_db_rem_item(app.db, ObjectId(id))
 
+    # delete index, create new index, populate index with data
+    app.es_engine.indices.delete(index=app.es_index)
+    aux.aux_es_create_index(app.es_engine, app.es_index)
+    aux.aux_es_update_index_from_db(app.es_engine, app.es_index, app.db)
+
     return redirect(url_for('admin_item_view', page_num=0, sort_c='0', sort_g='0', sort_b='0', sort_p='0')) 
 
 
@@ -254,6 +388,7 @@ def admin_item_add_one():
             'pic3': request.form['pic3'],
         }
         aux.aux_db_add_item(app.db, item=item_info)
+        aux.aux_es_update_index_from_db(app.es_engine, app.es_index, app.db)
 
         # reload page form with empty fields
         return redirect('admin_item_add_one')
