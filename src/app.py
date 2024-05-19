@@ -12,8 +12,9 @@ from flask import Flask, render_template, request, url_for, redirect
 from bson.objectid import ObjectId
 from pymongo import MongoClient
 
-# elastic search engine
-from elasticsearch import Elasticsearch
+# semantic search engine
+import torch
+from sentence_transformers import SentenceTransformer
 
 # data processing
 import numpy as np
@@ -22,14 +23,21 @@ import pandas as pd
 # custom
 import aux
 
+""" 
+    TODO:
+        - search query should be kept when redirecting to next/previous page
+        - download template data (upload new items)
+        - add requrements.txt
+"""
+
 app = Flask(__name__)
 app.config['ADMIN_USERNAME'] = 'admin'
 app.config['ADMIN_PASSWORD'] = 'admin'
-app.config['ADMIN_SESSION_TIME'] = timedelta(hours=3)
+app.config['ADMIN_SESSION_TIME'] = timedelta(hours=1)
 app.config['ADMIN_SESSION_LAST'] = datetime.now()
 app.config['SECRET_KEY'] = '0123456789'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-app.login = True
+app.login = False
 preload_data = {
     'about': open('static/info/about.txt', 'r').read().split('\n'),
     'footer': open('static/info/footer.txt', 'r').read(),
@@ -41,35 +49,14 @@ def startup():
     app.mongo_client = MongoClient('mongodb://localhost:27017/')
     app.db = app.mongo_client['config']
 
-    # init elastic search engine
-    app.es_index = 'info'
-    app.es_engine = Elasticsearch("http://localhost:9200")
-    aux.aux_es_create_index(app.es_engine, app.es_index, {
-        'properties': {
-            'id': {'type': 'text'},
-            'title': {'type': 'text', 'analyzer': 'standard'},
-            'description': {'type': 'text', 'analyzer': 'standard'},
-            'price': {'type': 'integer'},
-            'category': {'type': 'text', 'analyzer': 'standard'},
-            'group': {'type': 'text', 'analyzer': 'standard'},
-            'brand': {'type': 'text', 'analyzer': 'standard'},
-            'pic1': {'type': 'text'},
-            'pic2': {'type': 'text'},
-            'pic3': {'type': 'text'},
-        }
-    })
-
-    # update es index
-    aux.aux_es_update_index_from_db(app.es_engine, app.es_index, app.db)
+    # semantic search engine
+    app.ss_model = SentenceTransformer('multi-qa-mpnet-base-dot-v1', device= 'cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def shutdown():
     if app.mongo_client:
         app.mongo_client.close()
     
-    # delete elastic search index
-    app.es_engine.indices.delete(index=app.es_index)
-
 
 @app.route('/')
 def index():
@@ -96,9 +83,9 @@ def store(page_num: int, sort_c: str = '0', sort_g: str = '0', sort_b: str = '0'
     })
     
     # process request
-    es_search = ''
+    query_search = ''
     if request.method == 'POST':
-        es_search = request.form['es_search']
+        query_search = request.form['query_search']
         for key in sort_by.keys():
             sort_by[key] = request.form[key] if len(request.form[key]) else sort_by_default[key]
         
@@ -113,19 +100,7 @@ def store(page_num: int, sort_c: str = '0', sort_g: str = '0', sort_b: str = '0'
     }        
 
     # find all items with elastic search
-    items = []
-    if len(es_search):
-        items = aux.aux_es_search(app.es_engine, app.es_index, es_search)
-        print(items)
-    else: # get all items
-        items = aux.aux_db_get_items(app.db) 
-
-    # filter items based on es_search
-    # if len(es_found):
-    #     result = []
-    #     for item in items:
-    #         for found_item in es_found:
-    #             if item['']
+    items = aux.aux_semantic_search(app.ss_model, query_search, aux.aux_db_get_items(app.db))
 
     # sort items 
     def create_page_info(items: list, page_num: int) -> dict:
@@ -361,11 +336,6 @@ def admin_item_remove(id: str):
     # remove object
     aux.aux_db_rem_item(app.db, ObjectId(id))
 
-    # delete index, create new index, populate index with data
-    app.es_engine.indices.delete(index=app.es_index)
-    aux.aux_es_create_index(app.es_engine, app.es_index)
-    aux.aux_es_update_index_from_db(app.es_engine, app.es_index, app.db)
-
     return redirect(url_for('admin_item_view', page_num=0, sort_c='0', sort_g='0', sort_b='0', sort_p='0')) 
 
 
@@ -388,7 +358,6 @@ def admin_item_add_one():
             'pic3': request.form['pic3'],
         }
         aux.aux_db_add_item(app.db, item=item_info)
-        aux.aux_es_update_index_from_db(app.es_engine, app.es_index, app.db)
 
         # reload page form with empty fields
         return redirect('admin_item_add_one')
