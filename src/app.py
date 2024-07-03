@@ -157,7 +157,6 @@ def store(page_num: int, sort_c: str = '0', sort_g: str = '0', sort_b: str = '0'
 
     return render_template('store.html', data={
         'footer': preload_data['footer'],
-        'about': preload_data['about'],
         'select_category': aux.aux_db_get_categories(app.db),
         'select_group': _groups,
         'select_brand': _brands,
