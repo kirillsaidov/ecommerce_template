@@ -38,16 +38,20 @@ app.config['ADMIN_SESSION_LAST'] = datetime.now()
 app.config['SECRET_KEY'] = '0123456789'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.login = False
-preload_data = {
-    'about': open('static/info/about.txt', 'r').read().split('\n'),
-    'footer': open('static/info/footer.txt', 'r').read(),
-}
+preload_data = {}
 
 
 def startup():
     # init mongo
     app.mongo_client = MongoClient('mongodb://localhost:27017/')
     app.db = app.mongo_client['config']
+
+    # load page text information
+    global preload_data
+    preload_files = [ 'about', 'brands', 'contacts', 'cooperation', 'delivery', 'footer', 'pay' ]
+    for file in preload_files:
+        with open('static/info/' + file + '.txt', 'r') as f:
+            preload_data[file] = f.read().split('\n')
 
     # semantic search engine
     app.ss_model = SentenceTransformer('multi-qa-mpnet-base-dot-v1', device= 'cuda' if torch.cuda.is_available() else 'cpu')
