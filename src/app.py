@@ -48,7 +48,7 @@ def startup():
 
     # load page text information
     global preload_data
-    preload_files = [ 'about', 'brands', 'contacts', 'cooperation', 'delivery', 'footer', 'pay' ]
+    preload_files = [ 'about', 'brands', 'contacts', 'collaboration', 'delivery', 'footer', 'payment' ]
     for file in preload_files:
         with open('static/info/' + file + '.txt', 'r') as f:
             preload_data[file] = f.read().split('\n')
@@ -168,7 +168,7 @@ def store(page_num: int, sort_c: str = '0', sort_g: str = '0', sort_b: str = '0'
 def about():
     return render_template('about.html', data={
         'footer': preload_data['footer'],
-        'about': preload_data['about'],
+        'info': preload_data['about'],
     })
 
 
@@ -176,7 +176,7 @@ def about():
 def brands():
     return render_template('brands.html', data={
         'footer': preload_data['footer'],
-        'about': preload_data['about'],
+        'info': preload_data['brands'],
     })
 
 
@@ -184,7 +184,7 @@ def brands():
 def payment():
     return render_template('payment.html', data={
         'footer': preload_data['footer'],
-        'about': preload_data['about'],
+        'info': preload_data['payment'],
     })
 
 
@@ -192,7 +192,7 @@ def payment():
 def delivery():
     return render_template('delivery.html', data={
         'footer': preload_data['footer'],
-        'about': preload_data['about'],
+        'info': preload_data['delivery'],
     })
 
 
@@ -200,7 +200,7 @@ def delivery():
 def collaboration():
     return render_template('collaboration.html', data={
         'footer': preload_data['footer'],
-        'about': preload_data['about'],
+        'info': preload_data['collaboration'],
     })
 
 
@@ -208,7 +208,7 @@ def collaboration():
 def contacts():
     return render_template('contacts.html', data={
         'footer': preload_data['footer'],
-        'about': preload_data['about'],
+        'info': preload_data['contacts'],
     })
 
 
