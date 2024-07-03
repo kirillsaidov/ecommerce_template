@@ -5,5 +5,5 @@ bin/
 archive/
 __pycache__/
 .DS_Store
-
+info/
 
